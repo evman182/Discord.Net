@@ -638,7 +638,8 @@ namespace Discord.API
 
             // @me is non-const to fool the ratelimiter, otherwise it will put add/remove in separate buckets
             var me = "@me";
-            await SendAsync("PUT", () => $"channels/{channelId}/messages/{messageId}/reactions/{emoji}/{me}", ids, options: options).ConfigureAwait(false);
+            var encodedEmoji = WebUtility.UrlEncode(emoji);
+            await SendAsync("PUT", () => $"channels/{channelId}/messages/{messageId}/reactions/{encodedEmoji}/{me}", ids, options: options).ConfigureAwait(false);
         }
         public async Task RemoveReactionAsync(ulong channelId, ulong messageId, ulong userId, string emoji, RequestOptions options = null)
         {
@@ -652,7 +653,8 @@ namespace Discord.API
             var ids = new BucketIds(channelId: channelId);
 
             var user = CurrentUserId.HasValue ? (userId == CurrentUserId.Value ? "@me" : userId.ToString()) : userId.ToString();
-            await SendAsync("DELETE", () => $"channels/{channelId}/messages/{messageId}/reactions/{emoji}/{user}", ids, options: options).ConfigureAwait(false);
+            var encodedEmoji = WebUtility.UrlEncode(emoji);
+            await SendAsync("DELETE", () => $"channels/{channelId}/messages/{messageId}/reactions/{encodedEmoji}/{user}", ids, options: options).ConfigureAwait(false);
         }
         public async Task RemoveAllReactionsAsync(ulong channelId, ulong messageId, RequestOptions options = null)
         {
@@ -680,7 +682,8 @@ namespace Discord.API
             ulong afterUserId = args.AfterUserId.GetValueOrDefault(0);
 
             var ids = new BucketIds(channelId: channelId);
-            Expression<Func<string>> endpoint = () => $"channels/{channelId}/messages/{messageId}/reactions/{emoji}?limit={limit}&after={afterUserId}";
+            var encodedEmoji = WebUtility.UrlEncode(emoji);
+            Expression<Func<string>> endpoint = () => $"channels/{channelId}/messages/{messageId}/reactions/{encodedEmoji}?limit={limit}&after={afterUserId}";
             return await SendAsync<IReadOnlyCollection<User>>("GET", endpoint, ids, options: options).ConfigureAwait(false);
         }
         public async Task AckMessageAsync(ulong channelId, ulong messageId, RequestOptions options = null)
